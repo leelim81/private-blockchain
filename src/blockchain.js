@@ -116,7 +116,7 @@ class Blockchain {
       const message_time = parseInt(message.split(':')[1]);
       const lapse_time = current_time - message_time;
 
-      if (lapse_time < 1111300) {
+      if (lapse_time < 300) {
         if (bitcoinMessage.verify(message, address, signature)) {
           const new_data = { owner: address, star };
           const block = new BlockClass.Block({ data: new_data });
