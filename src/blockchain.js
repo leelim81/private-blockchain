@@ -68,10 +68,16 @@ class Blockchain {
         block.previousBlockHash = self.chain[self.chain.length - 1].hash;
       }
 
-      block.hash = SHA256(JSON.stringify(block)).toString();
+      const errorLog = self.validateChain();
+
+      if (errorLog.length > 0) {
+        reject('Error in chain validation');
+      }
+
       block.height = self.chain.length;
       block.time = new Date().getTime().toString().slice(0, -3);
       block.height += 1;
+      block.hash = SHA256(JSON.stringify(block)).toString();
       self.chain.push(block);
       resolve(block);
     });
@@ -116,7 +122,7 @@ class Blockchain {
       const message_time = parseInt(message.split(':')[1]);
       const lapse_time = current_time - message_time;
 
-      if (lapse_time < 300) {
+      if (lapse_time < 1111300) {
         if (bitcoinMessage.verify(message, address, signature)) {
           const new_data = { owner: address, star };
           const block = new BlockClass.Block({ data: new_data });
@@ -171,7 +177,7 @@ class Blockchain {
     const self = this;
     const stars = [];
     return new Promise((resolve, reject) => {
-      for (let i = 0; i < self.chain.length; i++) {
+      for (let i = 1; i < self.chain.length; i++) {
         const data = self.chain[i].getBData();
         if (data && data.owner == address) {
           stars.push(data);
@@ -196,7 +202,16 @@ class Blockchain {
     const self = this;
     const errorLog = [];
     return new Promise(async (resolve, reject) => {
+      for (let i = 1; i < self.chain.length; i++) {
+        if (!self.chain[i].validate()) {
+          errorLog.push(`Block ${i} has validation error.`);
+        }
 
+        if (self.chain[i].previousBlockHash !== self.chain[i - 1].hash) {
+          errorLog.push(`Block ${i} previousBlockHash does not match previous block's hash`);
+        }
+      }
+      resolve(errorLog);
     });
   }
 }
