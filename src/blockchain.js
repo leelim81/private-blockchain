@@ -68,18 +68,18 @@ class Blockchain {
         block.previousBlockHash = self.chain[self.chain.length - 1].hash;
       }
 
-      const errorLog = self.validateChain();
-
-      if (errorLog.length > 0) {
-        reject('Error in chain validation');
-      }
-
       block.height = self.chain.length;
       block.time = new Date().getTime().toString().slice(0, -3);
       block.height += 1;
       block.hash = SHA256(JSON.stringify(block)).toString();
-      self.chain.push(block);
-      resolve(block);
+
+      const errorLog = self.validateChain();
+      if (errorLog.length > 0) {
+        reject('Error in chain validation');
+      } else {
+        self.chain.push(block);
+        resolve(block);
+      }
     });
   }
 
@@ -122,7 +122,7 @@ class Blockchain {
       const message_time = parseInt(message.split(':')[1]);
       const lapse_time = current_time - message_time;
 
-      if (lapse_time < 1111300) {
+      if (lapse_time < 300) {
         if (bitcoinMessage.verify(message, address, signature)) {
           const new_data = { owner: address, star };
           const block = new BlockClass.Block({ data: new_data });

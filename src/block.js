@@ -45,6 +45,7 @@ class Block {
       // Comparing if the hashes changed
       // Returning the Block is not valid
       const correct_hash = SHA256(JSON.stringify(self)).toString();
+      self.hash = temp_hash;
       // Returning the Block is valid
       resolve(temp_hash == correct_hash);
     });
